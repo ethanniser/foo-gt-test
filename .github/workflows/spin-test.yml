@@ -1,0 +1,52 @@
+name: Spin Test
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  spin-and-succeed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Spin for 30 seconds
+        run: |
+          echo "Starting 30-second spin..."
+          echo "⏳ Please wait while we simulate some work..."
+
+          # Show a spinner animation while sleeping
+          spin() {
+            local delay=0.1
+            local spinstr='|/-\'
+            local temp
+            while [ "$(ps a | awk '{print $1}' | grep $!)" ]; do
+              temp=${spinstr#?}
+              printf " [%c]  " "$spinstr"
+              spinstr=$temp${spinstr%"$temp"}
+              sleep $delay
+              printf "\b\b\b\b\b\b"
+            done
+            printf "    \b\b\b\b"
+          }
+
+          # Start background sleep process
+          sleep 30 &
+
+          # Show spinner while waiting
+          spin
+
+          # Wait for the sleep to complete
+          wait
+
+          echo ""
+          echo "✅ 30 seconds completed successfully!"
+
+      - name: Success message
+        run: |
+          echo "🎉 Workflow completed successfully!"
+          echo "This workflow demonstrates a 30-second delay followed by success."
